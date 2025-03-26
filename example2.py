@@ -12,6 +12,8 @@ ARRAY16 = 0xDC
 ARRAY32 = 0xDD
 MAP16 = 0xDE
 MAP32 = 0xDF
+TRUE = 0xC3  # `True` 在 msgpack 中的表示
+FALSE = 0xC2  # `False` 在 msgpack 中的表示
 
 # 序列化整數（無符號）
 def encode_int(value):
@@ -40,9 +42,15 @@ def encode_string(s):
         return bytes([STRING32]) + struct.pack('>I', length) + s.encode('utf-8')
     return b''
 
+# 序列化布林值
+def encode_bool(value):
+    return bytes([TRUE]) if value else bytes([FALSE])
+
 # 序列化列表（數組）
 def encode_array(arr):
     length = len(arr)
+    if length <= 15:  # 小於等於 15 個元素，msgpack 用 0x90 - 0x9F
+        return bytes([0x90 + length]) + b''.join(encode_object(item) for item in arr)
     if length <= 65535:  # 小於等於 65535 個元素
         return bytes([ARRAY16]) + struct.pack('>H', length) + b''.join(encode_object(item) for item in arr)
     elif length <= 4294967295:  # 小於等於 4294967295 個元素
@@ -54,27 +62,29 @@ def encode_map(d):
     length = len(d)
     if length <= 15:  # 小於等於 15 個鍵值對，msgpack 用 0x80 - 0x8F
         return bytes([0x80 + length]) + b''.join(
-            encode_object(k) + encode_object(v) for k, v in d.items()
+            encode_object(k) + encode_object(v) for k, v in d.items()  # 保持原始順序
         )
     elif length <= 65535:  # 小於等於 65535 個鍵值對
         return bytes([MAP16]) + struct.pack('>H', length) + b''.join(
-            encode_object(k) + encode_object(v) for k, v in d.items()
+            encode_object(k) + encode_object(v) for k, v in d.items()  # 保持原始順序
         )
     elif length <= 4294967295:  # 小於等於 4294967295 個鍵值對
         return bytes([MAP32]) + struct.pack('>I', length) + b''.join(
-            encode_object(k) + encode_object(v) for k, v in d.items()
+            encode_object(k) + encode_object(v) for k, v in d.items()  # 保持原始順序
         )
     return b''
 
 # 通用的物件序列化處理
 def encode_object(obj):
-    if isinstance(obj, int):
+    if type(obj) == int:
         return encode_int(obj)
-    elif isinstance(obj, str):
+    elif type(obj) == str:
         return encode_string(obj)
-    elif isinstance(obj, list):
+    elif type(obj) == bool:  # 處理布林值
+        return encode_bool(obj)
+    elif type(obj) == list or type(obj) == tuple:
         return encode_array(obj)
-    elif isinstance(obj, dict):
+    elif type(obj) == dict:
         return encode_map(obj)
     return b''
 
@@ -89,10 +99,12 @@ data = {
 # 序列化數據
 encoded_data = encode_object(data)
 print(f'Encoded Data: {encoded_data.hex()}')
+print(f'Encoded Data: {encoded_data}')
 
 # 使用 msgpack 進行序列化
 import msgpack
 packed_data = msgpack.packb(data)
 
 # 打印序列化后的数据
-print(f"Packed Data: {packed_data.hex()}")
+print(f"2Packed Data: {packed_data.hex()}")
+print(f"2Packed Data: {packed_data}")

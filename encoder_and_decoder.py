@@ -86,6 +86,9 @@ def msgpack_decode(data, offset=0):
         return struct.unpack(">I", data[offset + 1:offset + 5])[0], offset + 5
     elif prefix == 0xCF:
         return struct.unpack(">Q", data[offset + 1:offset + 9])[0], offset + 9
+    # float64
+    elif prefix == 0xCB:
+        return struct.unpack(">d", data[offset + 1:offset + 9])[0], offset + 9
     # string
     elif prefix >= 0xA0 and prefix <= 0xBF:
         length = prefix - 0xA0
@@ -122,4 +125,4 @@ def msgpack_decode(data, offset=0):
 
 # # 測試解碼
 # decoded_data, _ = msgpack_decode(packed_data)
-# print("解碼後數據:", decoded_data)
+# print("MessagePack 解碼結果:", decoded_data)

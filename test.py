@@ -1,4 +1,4 @@
-from decode_data import msgpack_encode, msgpack_decode
+from encoder_and_decoder import msgpack_encode, msgpack_decode
 import msgpack
 
 def test_msgpack_encode():

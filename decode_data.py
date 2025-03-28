@@ -59,11 +59,6 @@ def msgpack_encode(data):
     else:
         raise TypeError(f"Unsupported type: {type(data)}")
 
-# 測試編碼
-test_data = {"name": "Alice", "age": 30, "is_student": False, "scores": [90, 80, 70]}
-packed_data = msgpack_encode(test_data)
-print("MessagePack 編碼結果:", packed_data.hex())
-
 def msgpack_decode(data, offset=0):
     """ 手刻 MessagePack 解碼 """
     prefix = data[offset]
@@ -120,6 +115,11 @@ def msgpack_decode(data, offset=0):
     else:
         raise ValueError(f"Unsupported prefix: {hex(prefix)}")
 
-# 測試解碼
-decoded_data, _ = msgpack_decode(packed_data)
-print("解碼後數據:", decoded_data)
+# # 測試編碼
+# test_data = {"name": "Alice", "age": 30, "is_student": False, "scores": [90, 80, 70]}
+# packed_data = msgpack_encode(test_data)
+# print("MessagePack 編碼結果:", packed_data.hex())
+
+# # 測試解碼
+# decoded_data, _ = msgpack_decode(packed_data)
+# print("解碼後數據:", decoded_data)
